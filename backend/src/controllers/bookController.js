@@ -27,12 +27,40 @@ const createBook = async (req, res) => {
 // @desc    Get all books (Reader "Load Book" dropdown list)
 // @route   GET /api/books
 const getBooks = async (req, res) => {
+  console.log("Received request to get books with query:", req.query); // Log the incoming request query for debugging
+
   try {
-    // Only send lightweight fields for the list view; full widgets fetched on demand
-    const books = await Book.find().select("pageTitle orientation createdAt updatedAt").sort({ createdAt: -1 });
-    res.status(200).json(books);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const skip = (page - 1) * limit;
+
+    const [books, totalBooks] = await Promise.all([
+      Book.find().select("pageTitle orientation createdAt updatedAt")
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit),
+
+      Book.countDocuments(),
+    ]);
+
+    res.status(200).json({
+      success: true,
+      data: books,
+      pagination: {
+        currentPage: page,
+        totalPages: Math.ceil(totalBooks / limit),
+        totalBooks,
+        limit,
+        hasNextPage: page < Math.ceil(totalBooks / limit),
+        hasPreviousPage: page > 1,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch books", error: error.message });
+    res.status(500).json({
+      message: "Failed to fetch books",
+      error: error.message,
+    });
   }
 };
 
@@ -40,6 +68,7 @@ const getBooks = async (req, res) => {
 // @route   GET /api/books/:id
 const getBookById = async (req, res) => {
   try {
+    console.log("dhbdsjcs")
     const book = await Book.findById(req.params.id);
     if (!book) {
       return res.status(404).json({ message: "Book not found" });

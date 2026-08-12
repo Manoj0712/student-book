@@ -1,5 +1,4 @@
 const express = require("express");
-const router = express.Router();
 const {
   createBook,
   getBooks,
@@ -8,9 +7,11 @@ const {
   deleteBook,
 } = require("../controllers/bookController");
 
-router.route("/create").post(createBook);
+const router = express.Router();
 
-router.route("/index").get(getBooks);
+router.post("/create", createBook);
+
+router.get("/index", getBooks);
 
 router.get("/:id", getBookById);
 
