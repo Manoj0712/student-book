@@ -1,10 +1,23 @@
 const mongoose = require("mongoose");
 
-// Each widget has a "type" (Text, Image, Video, Audio, 3DObject, LiveData)
-// and a "props" object whose shape differs per type — so props is stored
-// as Mixed/flexible JSON rather than a rigid sub-schema.
+
+const widgetLayoutSchema = new mongoose.Schema(
+  {
+    page: { type: Number, default: 0 },
+    x: { type: Number, required: true },
+    y: { type: Number, required: true },
+    w: { type: Number, required: true },
+    h: { type: Number, required: true },
+  },
+  { _id: false }
+);
+
+
 const widgetSchema = new mongoose.Schema(
   {
+    id: {
+      type: String,
+    },
     type: {
       type: String,
       required: true,
@@ -14,8 +27,12 @@ const widgetSchema = new mongoose.Schema(
       type: mongoose.Schema.Types.Mixed,
       default: {},
     },
+    layout: {
+      type: widgetLayoutSchema,
+      required: false,
+    },
   },
-  { _id: false } // keep widget objects lightweight; array order = display order
+  { _id: false }
 );
 
 const bookSchema = new mongoose.Schema(
